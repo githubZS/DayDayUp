@@ -1,0 +1,24 @@
+主要原因是 pom中用的mysql connect java 还是老版本的，没有适应新版本mysql8
+
+太低了，所以升级一下。
+
+更改pom中mysql jar为
+
+<dependency>
+  <groupId>mysql</groupId>
+  <artifactId>mysql-connector-java</artifactId>
+  <version>8.0.11</version>
+
+</dependency>
+
+之后发现会报新错误
+
+mysql java.sql.SQLException: The server time zone value‘'???ú±ê×' is unrecognized or represents...
+
+这是由于mysql8中数据库和系统时区差异造成的
+
+解决办法，更改jdbcurl增加
+
+&serverTimezone=GMT%2B8
+
+jdbc.url_dev=jdbc:mysql://127.0.0.1:3306/umbrelladatabase?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
