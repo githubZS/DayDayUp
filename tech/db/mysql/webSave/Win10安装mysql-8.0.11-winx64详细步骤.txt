@@ -1,0 +1,114 @@
+blog:
+https://blog.csdn.net/qq_20788055/article/details/80372577
+
+
+1.进入地址：https://dev.mysql.com/downloads/mysql/ 下载mysql-8.0.11-winx64
+
+2.解压zip包，并将解压文件放入一个文件夹下，如图：
+
+3.配置环境变量（目的是为了避免在CMD窗口下操作时反复切换路径）
+
+在Path下添加 D:\Program Files\mysql-8.0.11-winx64\bin
+
+4.编写配置文件
+
+我们发现解压后的目录并没有my.ini（或my-default.ini）文件，没关系可以自行创建。在安装根目录下添加 my.ini，比如我这里是：D:\Program Files\mysql-8.0.11-winx64\my-default.ini，写入基本配置：
+
+注意：data文件夹是初始化数据库之后才有的，my-default.ini文件默认是没有的，自己可以编写如下：
+
+[mysqld]
+# 设置3306端口
+port=3306
+# 设置mysql的安装目录
+basedir=D:\Program Files\MySQL
+# 设置mysql数据库的数据的存放目录
+datadir=D:\Users\qiuzhiwen\MySQL\Data
+# 允许最大连接数
+max_connections=200
+# 允许连接失败的次数。这是为了防止有人从该主机试图攻击数据库系统
+max_connect_errors=10
+# 服务端使用的字符集默认为UTF8
+character-set-server=utf8
+# 创建新表时将使用的默认存储引擎
+default-storage-engine=INNODB
+# 默认使用“mysql_native_password”插件认证
+default_authentication_plugin=mysql_native_password
+[mysql]
+# 设置mysql客户端默认字符集
+default-character-set=utf8
+[client]
+# 设置mysql客户端连接服务端时默认使用的端口
+port=3306
+default-character-set=utf8
+
+其中basedir和datadir可以根据自己的实际情况来决定！
+
+5.按“win”键打开开始菜单，在搜索框中输入“cmd”，在搜索结果中选中“命令提示符”程序，右键选择“以管理员身份运行”
+
+
+    6.MySQL服务安装及初始化
+
+执行mysqld install命令当出现Service successfully installed时表示mysql服务安装完成
+
+注意：mysqld --install [服务名]
+
+后面的服务名可以不写，默认的名字为 mysql。当然，如果你的电脑上需要安装多个MySQL服务，就可以用不同的名字区分了，比如 mysql5 和 mysql8。
+
+Mysql初始化
+
+在MySQL安装目录的 bin 目录下执行命令：
+
+mysqld --initialize --console
+
+执行完成后，会打印 root 用户的初始默认密码，比如：
+
+注意！执行输出结果里面有一段： [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: Ng*jbnKGd2_!其中root@localhost:后面的“Ng*jbnKGd2_!”就是初始密码（不含首位空格）。在没有更改密码前，需要记住这个密码，后续登录需要用到。要是手贱，关快了，或者没记住，那也没事，删掉初始化的 datadir 目录，再执行一遍初始化命令，又会重新生成的。当然，也可以使用安全工具，强制改密码，用什么方法，自己随意。
+
+参考：https://dev.mysql.com/doc/refman/8.0/en/data-directory-initialization-mysqld.html
+
+安装完成之后，就可以通过命令net start mysql启动MySQL的服务了。
+
+
+7.更改密码和密码认证插件
+
+进入D:\Program Files\mysql-8.0.11-winx64\bin路径下，执行mysql -u root -p命令，然后输入之前保存的密码，我这里是Ng*jbnKGd2_!
+
+修改用户密码，在MySQL中执行命令：
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '新密码';
+修改密码验证插件，同时修改密码。
+
+可以用 命令查看一下默认安装的数据库：
+
+show databases;
+
+use mysql;
+
+show tables;
+
+看到默认初始化了mysql数据库，其中user表里面存储MySQL用户信息。我们可以看一下默认MySQL用户：
+
+ select user,host,authentication_string from mysql.user;
+
+
+管理员root的host是localhost，代表仅限localhost登录访问。如果要允许开放其他ip登录，则需要添加新的host。如果要允许所有ip访问，可以直接修改成“%”
+
+创建用户：
+
+CREATE USER 'xxh'@'%' IDENTIFIED WITH mysql_native_password BY 'xxh123!@#';
+
+#(需要注意：mysql8.0加密方式修改了)
+#检查用户
+
+select user, host, plugin, authentication_string from user\G;
+
+授权远程数据库
+
+#授权所有权限
+GRANT ALL PRIVILEGES ON *.* TO 'xxh'@'%'；
+#授权基本的查询修改权限，按需求设置
+GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON *.* TO 'xxh'@'%';
+
+查看用户权限
+show grants for 'xxh'@'%';
+至此，Win10安装mysql-8.0.11-winx64详细步骤已经介绍完了
